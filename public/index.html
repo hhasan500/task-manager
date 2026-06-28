@@ -1,19 +1,45 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Task Manager</title>
+  <title>Task Manager SaaS</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Task Manager</h1>
+  <main>
+    <h1>Task Manager</h1>
 
-  <form id="taskForm">
-    <input type="text" id="title" placeholder="Task title" required>
-    <input type="text" id="description" placeholder="Description">
-    <button type="submit">Add Task</button>
-  </form>
+    <section id="authSection">
+      <div class="card">
+        <h2>Create Account</h2>
+        <input id="registerName" placeholder="Name">
+        <input id="registerEmail" placeholder="Email">
+        <input id="registerPhone" placeholder="Phone, example +12065551234">
+        <input id="registerPassword" type="password" placeholder="Password">
+        <button onclick="register()">Register</button>
+      </div>
 
-  <div id="taskList"></div>
+      <div class="card">
+        <h2>Sign In</h2>
+        <input id="loginEmail" placeholder="Email">
+        <input id="loginPassword" type="password" placeholder="Password">
+        <button onclick="login()">Sign In</button>
+      </div>
+    </section>
+
+    <section id="taskSection" class="hidden">
+      <p id="welcome"></p>
+      <button onclick="logout()">Logout</button>
+
+      <div class="card">
+        <h2>Add Task</h2>
+        <input id="taskTitle" placeholder="Task title">
+        <input id="taskDescription" placeholder="Description">
+        <button onclick="addTask()">Add Task</button>
+      </div>
+
+      <div id="taskList"></div>
+    </section>
+  </main>
 
   <script src="app.js"></script>
 </body>

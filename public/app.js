@@ -1,10 +1,70 @@
-const taskForm = document.getElementById("taskForm");
-const taskList = document.getElementById("taskList");
+async function checkUser() {
+  const res = await fetch("/api/me");
+  const data = await res.json();
+
+  if (data.user) {
+    document.getElementById("authSection").classList.add("hidden");
+    document.getElementById("taskSection").classList.remove("hidden");
+    document.getElementById("welcome").textContent = `Welcome, ${data.user.name}`;
+    loadTasks();
+  } else {
+    document.getElementById("authSection").classList.remove("hidden");
+    document.getElementById("taskSection").classList.add("hidden");
+  }
+}
+
+async function register() {
+  const name = document.getElementById("registerName").value;
+  const email = document.getElementById("registerEmail").value;
+  const phone = document.getElementById("registerPhone").value;
+  const password = document.getElementById("registerPassword").value;
+
+  const res = await fetch("/api/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, email, phone, password })
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    alert(data.error);
+    return;
+  }
+
+  checkUser();
+}
+
+async function login() {
+  const email = document.getElementById("loginEmail").value;
+  const password = document.getElementById("loginPassword").value;
+
+  const res = await fetch("/api/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password })
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    alert(data.error);
+    return;
+  }
+
+  checkUser();
+}
+
+async function logout() {
+  await fetch("/api/logout", { method: "POST" });
+  checkUser();
+}
 
 async function loadTasks() {
   const res = await fetch("/api/tasks");
   const tasks = await res.json();
 
+  const taskList = document.getElementById("taskList");
   taskList.innerHTML = "";
 
   tasks.forEach(task => {
@@ -14,14 +74,8 @@ async function loadTasks() {
     div.innerHTML = `
       <h3>${task.title}</h3>
       <p>${task.description || ""}</p>
-      <p>Status: ${task.status}</p>
-
-      <select onchange="updateStatus(${task.id}, this.value)">
-        <option ${task.status === "To Do" ? "selected" : ""}>To Do</option>
-        <option ${task.status === "In Progress" ? "selected" : ""}>In Progress</option>
-        <option ${task.status === "Done" ? "selected" : ""}>Done</option>
-      </select>
-
+      <small>Status: ${task.status}</small>
+      <br>
       <button onclick="deleteTask(${task.id})">Delete</button>
     `;
 
@@ -29,32 +83,25 @@ async function loadTasks() {
   });
 }
 
-taskForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
+async function addTask() {
+  const title = document.getElementById("taskTitle").value;
+  const description = document.getElementById("taskDescription").value;
 
-  const title = document.getElementById("title").value;
-  const description = document.getElementById("description").value;
-
-  await fetch("/api/tasks", {
+  const res = await fetch("/api/tasks", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ title, description })
   });
 
-  taskForm.reset();
-  loadTasks();
-});
+  const data = await res.json();
 
-async function updateStatus(id, status) {
-  await fetch(`/api/tasks/${id}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ status })
-  });
+  if (!res.ok) {
+    alert(data.error);
+    return;
+  }
+
+  document.getElementById("taskTitle").value = "";
+  document.getElementById("taskDescription").value = "";
 
   loadTasks();
 }
@@ -67,4 +114,4 @@ async function deleteTask(id) {
   loadTasks();
 }
 
-loadTasks();
+checkUser();
